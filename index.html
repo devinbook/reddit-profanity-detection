@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reddit Profanity Detector</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #2d3e50;
+      }
+      #profanityForm input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #profanityForm button {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 15px;
+      }
+      #profanityForm button:hover {
+        background-color: #0056b3;
+        cursor: pointer;
+      }
+      #results {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        word-wrap: break-word;
+      }
+      .spinner-border {
+        display: none;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Check Profanity in Reddit Comments</h2>
+      <form id="profanityForm">
+        <label for="post_url">Enter Reddit Post URL:</label>
+        <input
+          type="text"
+          id="post_url"
+          name="post_url"
+          placeholder="e.g., https://www.reddit.com/r/someSubreddit/comments/someId/"
+          required
+          aria-required="true"
+        />
+        <button type="button" onclick="checkProfanity()">
+          Check Profanity
+        </button>
+      </form>
+
+      <div
+        id="loadingSpinner"
+        class="spinner-border text-primary"
+        role="status"
+        aria-hidden="true"
+      >
+        <span class="sr-only">Checking for profanity...</span>
+      </div>
+
+      <h3>Results</h3>
+      <pre id="results"></pre>
+    </div>
+
+    <script>
+      async function checkProfanity() {
+        const post_url = document.getElementById("post_url").value;
+
+        // Display loading spinner
+        document.getElementById("loadingSpinner").style.display = "block";
+
+        try {
+          const response = await fetch("/check_reddit_profanity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ post_url }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            document.getElementById("results").textContent = JSON.stringify(
+              result,
+              null,
+              2
+            );
+          } else {
+            document.getElementById("results").textContent =
+              "Error: Unable to fetch data. Please check the URL.";
+          }
+        } catch (error) {
+          document.getElementById("results").textContent =
+            "An error occurred. Please try again.";
+        }
+
+        // Hide loading spinner after the request is complete
+        document.getElementById("loadingSpinner").style.display = "none";
+      }
+
+      // Optional: Allow form submission with Enter key
+      document
+        .getElementById("profanityForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          checkProfanity();
+        });
+    </script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
